@@ -4,6 +4,6 @@ RUN apt-get update -y
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y software-properties-common build-essential python3.8 python-dev
 COPY . /app
 WORKDIR /app
-RUN pip install -r requirements.txt
+#RUN pip install -r requirements.txt
 ENTRYPOINT ["python"]
 CMD ["app.py"]
