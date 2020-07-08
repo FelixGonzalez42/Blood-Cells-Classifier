@@ -1,8 +1,8 @@
 FROM ubuntu:latest
 MAINTAINER  Your_name "felix141996@gmail.com"
 RUN apt-get update -y
-sudo apt-get install software-properties-common
-sudo apt-add-repository universe
+RUN apt-get install software-properties-common
+RUN apt-add-repository universe
 RUN apt-get update -y
 RUN apt-get install -y build-essential python3.8 python-pip python-dev
 VOLUME ["/var/www/app/public"]
