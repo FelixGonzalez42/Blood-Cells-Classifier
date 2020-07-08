@@ -1,5 +1,6 @@
 FROM ubuntu:latest
 MAINTAINER  Your_name "felix141996@gmail.com"
+RUN apt-add-repository universe
 RUN apt-get update -y
 RUN apt-get install -y software-properties-common build-essential python3.8 python-pip python-dev
 VOLUME ["/var/www/app/public"]
