@@ -23,4 +23,4 @@
 * Ejecuta la aplicación *python3 app1.py*
 * La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8080
 
-**Construir la imagen del servidor, instalar librerias en el servidor y ejecutar pruebas en el servidor de azure (Próximamente..)
+**instrucciones para Construir la imagen del servidor, instalar librerias en el servidor y ejecutar pruebas en el servidor de azure (Próximamente..)
