@@ -7,5 +7,5 @@ ADD . /var/www/app/public
 COPY . /var/www/app/public
 WORKDIR /var/www/app/public
 RUN pip3 install -r requirements.txt
-ENTRYPOINT ["sh"]
-CMD ["init.sh"]
+ENTRYPOINT ["python3"]
+CMD ["app1.py"]
