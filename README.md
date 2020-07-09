@@ -12,7 +12,7 @@
 
 **Si tienes instalado Docker:
 
-* Crea la imagen de docker (si es necesario como administrador o sudo) *docker build -t ds4a -p . --no-cache*
+* Crea la imagen de docker (si es necesario como administrador o sudo) *docker build -t ds4a . --no-cache*
 * Ejecuta la aplicación (si es necesario como administrador o sudo) *sudo docker run -p 8080:8050 -v $(pwd):/var/www/app/public ds4a*
 * La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8080
 
