@@ -19,6 +19,6 @@
 * Asegurate de tener Python3.8 y pip3 instalado 
 * Instala las librerias necesarias listadas en requirements.txt *pip3 install -r requirements.txt*
 * Ejecuta la aplicación *python3 app1.py*
-* La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8080
+* La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8050
 
 **instrucciones para Construir la imagen del servidor, instalar librerias en el servidor y ejecutar pruebas en el servidor de azure (Próximamente..)
