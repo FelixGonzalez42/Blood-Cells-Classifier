@@ -32,5 +32,5 @@ scipy==0.17.1
 scikit-learn==0.17.1
 pillow==3.4.2
 torch==1.5.1+cpu
-fastai==1.0.0b3
+fastai==1.0.61
 torchvision==0.6.1+cpu
