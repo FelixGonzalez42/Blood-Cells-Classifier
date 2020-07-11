@@ -106,8 +106,8 @@ app.layout = html.Div([
             id='title',style={'color':'White'}
         ),
         html.Img(
-            #src=app.get_asset_url("logods4all.svg"),
-            style={'backgroundColor':'Blue'}
+            src=app.get_asset_url("logods4all.svg"),
+            #style={'backgroundColor':'Blue'}
         )
     ],
         className="banner",
