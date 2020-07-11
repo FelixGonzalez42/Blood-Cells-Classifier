@@ -2,7 +2,7 @@
 
 **Código del proyecto DS4A Clasificador de células de sangre periférica team 14**
 
-***¿Como correr?
+***¿Como correr?**
 
 * Instala Git https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Instalación-de-Git
 * Clona este repositorio *git clone https://github.com/Fag42/MinTIC-DS4A-Project---Team-14*
