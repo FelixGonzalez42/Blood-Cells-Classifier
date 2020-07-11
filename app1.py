@@ -4,7 +4,6 @@ their classification as a gallery. The current method uses Dash with python
  To put in production do:
  gunicorn image_upload_gallery_classify:server -b :7070 -t 1000
 """
-#Holamundo
 import base64
 import os
 # import sh
@@ -107,8 +106,8 @@ app.layout = html.Div([
             id='title',style={'color':'White'}
         ),
         html.Img(
-            #src=app.get_asset_url("logods4all.svg"),
-            style={'backgroundColor':'Purple'}
+            src=app.get_asset_url("logods4all.svg"),
+            #style={'backgroundColor':'Blue'}
         )
     ],
         className="banner",

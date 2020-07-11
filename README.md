@@ -2,7 +2,7 @@
 
 **Código del proyecto DS4A Clasificador de células de sangre periférica team 14**
 
-***¿Como correr?
+***¿Como correr?**
 
 * Instala Git https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Instalación-de-Git
 * Clona este repositorio *git clone https://github.com/Fag42/MinTIC-DS4A-Project---Team-14*
@@ -11,7 +11,7 @@
 **Si tienes instalado Docker:
 
 * Crea la imagen de docker (si es necesario como administrador o sudo) *docker build -t ds4a . --no-cache*
-* Ejecuta la aplicación (si es necesario como administrador o sudo) *sudo docker run -p 8080:8050 -v $(pwd):/var/www/app/public ds4a*
+* Ejecuta la aplicación (si es necesario como administrador o sudo) *sudo docker run -p 8080:8050 --name ds4a -v $(pwd):/var/www/app/public ds4a*
 * La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8080
 
 **Si no tienes Docker:
