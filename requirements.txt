@@ -31,3 +31,4 @@ scikit-learn==0.22
 torch==1.5.1+cpu
 fastai==1.0.61
 torchvision==0.6.1+cpu
+efficientnet-pytorch==0.6.3

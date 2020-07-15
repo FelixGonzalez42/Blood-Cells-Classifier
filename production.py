@@ -5,16 +5,16 @@ import os
 CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
 DIRECTORY = os.path.join(CURRENT_FOLDER, 'models')
 
-modelo = "export-cells ResNet18.pkl"
-# modelo = "export-cells_EfficientNet.pkl"
+# modelo = "export-cells ResNet18.pkl"
+modelo = "export-cells_EfficientNet.pkl"
 
 
 learn = load_learner(DIRECTORY, modelo) # Load the full model
 
-learn.to_fp16() # It's necessary for the efficient model (exported as fp16)
+# learn.to_fp16() # It's necessary for the efficient model (exported as fp16)
+learn.to_fp32()
 
-
-def prediction(directorio, num_batch = 12):
+def prediction(directorio, num_batch = 8):
     
     data = ImageList.from_folder(directorio) # build the ImageList from the folder
     learn.data.add_test(data) # add data to the test set of learn

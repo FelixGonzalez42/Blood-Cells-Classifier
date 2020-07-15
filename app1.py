@@ -28,8 +28,6 @@ from collections import Counter
 
 
 ## =============================================
-
-
 USERNAME_PASSWORD = [['team14', 't34m14']] # Use only as a secure option
 
 # Detecting and/or making the current image path
@@ -142,9 +140,10 @@ app.layout = html.Div([
             multiple=True,
             accept='image/*'
         ),
-
+        dcc.Loading( id="loading-1",
+            children=[
         html.Div(id='output-image-upload'),
-        html.Div(id='tabs-content', style = {'margin':'auto'}),
+        html.Div(id='tabs-content', style = {'margin':'auto'}) ] ),
 
         ],
             style={#'float':'right',
@@ -218,6 +217,7 @@ def update_output(list_of_contents, list_of_names):
         # ==============Classification process ====================
         ## HAY QUE MODIFICAR LA FUNCION PREDICTION CON UN MODELO AJUSTADO Y NO RANDOM
         PREDICTIONS_DICT = prediction(UPLOAD_DIRECTORY)
+
         # Make the prediction dictionary with files and predictions
         #PREDICTIONS_DICT = dict(zip(files, predictions))
         # print(PREDICTIONS_DICT.values())
