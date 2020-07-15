@@ -4,6 +4,7 @@ their classification as a gallery. The current method uses Dash with python
  To put in production do:
  gunicorn image_upload_gallery_classify:server -b :7070 -t 1000
 """
+
 import base64
 import os
 # import sh
@@ -107,7 +108,7 @@ app.layout = html.Div([
         ),
         html.Img(
             src=app.get_asset_url("logods4all.svg"),
-            #style={'backgroundColor':'Blue'}
+            # style={'backgroundColor':'Purple'}
         )
     ],
         className="banner",
@@ -216,9 +217,9 @@ def update_output(list_of_contents, list_of_names):
 
         # ==============Classification process ====================
         ## HAY QUE MODIFICAR LA FUNCION PREDICTION CON UN MODELO AJUSTADO Y NO RANDOM
-        files, predictions = prediction(UPLOAD_DIRECTORY)
+        PREDICTIONS_DICT = prediction(UPLOAD_DIRECTORY)
         # Make the prediction dictionary with files and predictions
-        PREDICTIONS_DICT = dict(zip(files, predictions))
+        #PREDICTIONS_DICT = dict(zip(files, predictions))
         # print(PREDICTIONS_DICT.values())
 
         # ========================================================
@@ -350,7 +351,5 @@ def load_model():
     from production import prediction
 
 
-if __name__ == '__main__':  
-    port = os.environ.get('dash_port')
-    debug = os.environ.get('dash_debug')=="True"
-    app.run_server(debug=debug, host="0.0.0.0", port=8050)
+if __name__ == '__main__':
+    app.run_server()
