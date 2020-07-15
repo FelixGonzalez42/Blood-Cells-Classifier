@@ -5,5 +5,4 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y software-properties-comm
 COPY ./requirements.txt /var/www/app/
 WORKDIR /var/www/app/
 RUN pip3 install -r requirements.txt
-ENTRYPOINT ["python3"]
-CMD ["public/app1.py"]
+ENTRYPOINT ["/bin/bash"]
