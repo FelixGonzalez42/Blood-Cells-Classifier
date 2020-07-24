@@ -2,7 +2,7 @@
 their classification as a gallery. The current method uses Dash with python
  (and flask).
  To put in production do:
- gunicorn image_upload_gallery_classify:server -b :7070 -t 1000
+ gunicorn app1:server -b :7070 -t 1000
 """
 
 import base64
@@ -16,6 +16,10 @@ from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import time
+from production import predictor
+import seaborn as sns
+from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
 
 
 import plotly.graph_objs as go
@@ -23,9 +27,9 @@ import plotly.graph_objs as go
 import numpy as np
 from collections import Counter
 
-## IMPORT THE MODEL HERE========================
+## IMPORT THE info prediccion HERE========================
 
-
+infop = predictor()
 
 ## =============================================
 USERNAME_PASSWORD = [['team14', 't34m14']] # Use only as a secure option
@@ -154,8 +158,6 @@ app.layout = html.Div([
 
 
 ])
-
-
 # _________________________End of Layout__________________________________
 # ________________________________________________________________________
 
@@ -203,8 +205,6 @@ def parse_contents(contents, filename, prediction):
 
 def update_output(list_of_contents, list_of_names):
 
-    global  PREDICTIONS_DICT, LABELS
-
     # Delete the previous files
     if os.listdir(UPLOAD_DIRECTORY):
         removefiles()
@@ -216,7 +216,10 @@ def update_output(list_of_contents, list_of_names):
 
         # ==============Classification process ====================
         ## HAY QUE MODIFICAR LA FUNCION PREDICTION CON UN MODELO AJUSTADO Y NO RANDOM
-        PREDICTIONS_DICT = prediction(UPLOAD_DIRECTORY)
+        infop.prediction(UPLOAD_DIRECTORY)
+        print(infop.features.shape)
+
+        infop.figure = make_plotClass()        
 
         # Make the prediction dictionary with files and predictions
         #PREDICTIONS_DICT = dict(zip(files, predictions))
@@ -224,15 +227,13 @@ def update_output(list_of_contents, list_of_names):
 
         # ========================================================
 
-        # Unique labels
-        LABELS = list(set(PREDICTIONS_DICT.values()))
-
         # Automatic Tabs infered from the LABELS
         children = html.Div([
                     dcc.Tabs( id="tabs", value='tab-0', 
                     children=[
                         dcc.Tab(label='Chart', value='tab-0'),
                         dcc.Tab(label='Classification', value='tab-1'),
+                        dcc.Tab(label='Visual analysis', value='tab-2')
                         ]
                         )
                     ])
@@ -251,7 +252,7 @@ def render_content(tab):
     if tab == 'tab-0':
         
         # Count the frecuencies of each predicted label
-        labels, values = count_images(PREDICTIONS_DICT)          
+        labels, values = count_images(infop.predictions_dict)          
 
         out = html.Div([
             html.Div([
@@ -290,13 +291,23 @@ def render_content(tab):
 
     elif tab == 'tab-1':
         child = list()
-        for l in LABELS:
+        for l in infop.labels:
             
             child.append( html.Div( children = show_test(l) +
             [html.Span(l, className = 'index', style = SPAN_STYLE)],
              className = 'box', style = BOX_STYLE
              )
-            )
+            )            
+
+        return child
+
+    elif tab == 'tab-2':
+        child = html.Div([
+            html.H4("TSNE of the Deep Features",
+                    style={'textAlign': 'center'}),
+            dcc.Graph(
+            figure = infop.figure
+            )])
 
         return child
 
@@ -336,7 +347,7 @@ def encode_image(image_file):
 
 def show_test(clase):
     children = []
-    for name,label in PREDICTIONS_DICT.items():
+    for name,label in infop.predictions_dict.items():
         if label == clase:
             # out.append(html.H4(name))
             contents = encode_image(os.path.join(UPLOAD_DIRECTORY, name))
@@ -344,14 +355,136 @@ def show_test(clase):
     return children
 
 # Data Loading and prediction
-@app.server.before_first_request
-def load_model():
-    global prediction
-    print("\nLoading before first request\n")
-    from production import prediction
+# @app.server.before_first_request
+# def load_model():
+#     global prediction
+#     print("\nLoading before first request\n")
+#     from production import prediction
+
+def make_plotClass():
+
+    # To avoid problem with 1D array
+    if infop.features.ndim == 1:
+        features = features.reshape(1,-1)
+
+    features = np.concatenate( (infop.features_train, infop.features))
+
+    im_embedded = TSNE(n_components=2, init='pca', random_state=42, n_jobs=-1, perplexity=20, n_iter=1000).fit_transform(features)
+
+
+    # scale and move the coordinates so they fit [0; 1] range
+    def scale_to_01_range(x):
+        # compute the distribution range
+        value_range = (np.max(x) - np.min(x))
+        # move the distribution so that it starts from zero
+        # by extracting the minimal value from all its values
+        starts_from_zero = x - np.min(x)
+        # make the distribution fit [0; 1] by dividing by its range
+        return starts_from_zero / value_range
+
+    # extract x and y coordinates representing the positions of the images on T-SNE plot
+    tx = im_embedded[:, 0]
+    ty = im_embedded[:, 1]
+
+    tx = scale_to_01_range(tx)
+    ty = scale_to_01_range(ty)
+
+    # Clustering of the two tsne components
+    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10,random_state=42)
+    im_normalized = np.c_[tx,ty]
+    kmeans.fit(im_normalized.astype('float64'))
+
+    # Find the corresponding labels of the clusters
+    tipos_train = np.array(infop.tipos_train)
+    kmeans_labels=[None for x in range(8)]
+    for tipo in set(tipos_train):
+        idx = tipos_train==tipo
+        tt = np.c_[tx[:1000][idx], ty[:1000][idx]]
+        clu = kmeans.predict(tt.mean(axis=0).reshape(1,-1).astype('float64'))
+        kmeans_labels[clu[0]]=tipo
+
+    # Step size of the mesh. Decrease to increase the quality of the VQ.
+    h = .002     # point in the mesh [x_min, x_max]x[y_min, y_max].
+
+    # Plot the decision boundary. For that, we will assign a color to each
+    x_min, x_max = im_normalized[:, 0].min(), im_normalized[:, 0].max()
+    y_min, y_max = im_normalized[:, 1].min(), im_normalized[:, 1].max()
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    
+    # Obtain labels for each point in mesh. Use last trained model.
+    Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+
+    # Color map from seaborn
+    paleta = sns.color_palette("Set1", n_colors=8) # paleta para la dispersion
+
+    # MAKE THE FIGURE USING PLOT.LY
+    fig = go.Figure(data=go.Heatmap(
+        z=Z,
+        x = xx[0],
+        y = xx[0],
+        colorscale=paleta.as_hex(), opacity = 0.3,
+        showscale=False,
+        hoverinfo='none',
+    ))
+
+    for color,label in zip(paleta.as_hex(),kmeans_labels):
+        ind = tipos_train == label
+        fig.add_trace(go.Scatter(
+            x = tx[:1000][ind],
+            y = ty[:1000][ind],
+            mode = 'markers',
+            marker=dict(
+                size = 15,
+                symbol = 'circle',
+                color = color,
+                opacity = 0.01,
+            ),
+            name = label,
+            opacity = 1,
+            hoverinfo = 'none',
+            visible = 'legendonly',
+        ))
+        
+    for color,label in zip(paleta.as_hex(),kmeans_labels):
+        ind = np.array(list(infop.predictions_dict.values())) == label
+        fig.add_trace(go.Scatter(
+            x = tx[1000:][ind],
+            y = ty[1000:][ind],
+            mode = 'markers',
+            marker=dict(
+                size = 10,
+                symbol = 'circle',
+                color = color,
+                line=dict(color='black',width=1),
+                opacity=0.5
+            ),
+            name = label,
+            opacity = 1,
+            hoverinfo = 'name',
+            visible = True,
+            showlegend=False,
+        ))
+
+    fig.update_layout(autosize=True,
+                    # width=600, height=600,
+                    xaxis=dict(constrain='domain', range=[0,1], showticklabels=False),
+                    yaxis=dict(scaleanchor="x", scaleratio=1, constrain='domain', range=[0,1], showticklabels=False),
+                    margin=go.layout.Margin(l=3, r=3,b=3, t=3 ),
+                    hovermode='closest',
+                    # title="TSNE of the deep features",
+                    # title_x=0.5,
+                    )
+
+    return fig
+
+
+
+
+
+ 
+
 
 
 if __name__ == '__main__':
-    port = os.environ.get('dash_port')
-    debug = os.environ.get('dash_debug')=="True"
-    app.run_server(debug=debug, host="0.0.0.0", port=8050)
+    app.run_server(debug=True)
