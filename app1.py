@@ -110,8 +110,8 @@ app.layout = html.Div([
             id='title',style={'color':'White'}
         ),
         html.Img(
-            #src=app.get_asset_url("logods4all.svg"),
-            style={'backgroundColor':'Purple'}
+            src=app.get_asset_url("logods4all.svg"),
+            # style={'backgroundColor':'Purple'}
         )
     ],
         className="banner",
@@ -362,7 +362,7 @@ def make_plotClass():
 
     # To avoid problem with 1D array
     if infop.features.ndim == 1:
-        features = features.reshape(1,-1)
+        infop.features = infop.features.reshape(1,-1)
 
     features = np.concatenate( (infop.features_train, infop.features))
 
@@ -387,7 +387,7 @@ def make_plotClass():
     ty = scale_to_01_range(ty)
 
     # Clustering of the two tsne components
-    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10, random_state=SEED)
+    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10,random_state=SEED)
     im_normalized = np.c_[tx,ty]
     kmeans.fit(im_normalized.astype('float64'))
 
