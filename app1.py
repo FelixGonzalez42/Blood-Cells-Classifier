@@ -39,6 +39,7 @@ CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
 UPLOAD_DIRECTORY = os.path.join(CURRENT_FOLDER, 'app_uploaded_files')
 # PREDICTIONS_DICT = dict()
 
+SEED = 123
 
 # Defining the styles of the boxes and their labels
 SPAN_STYLE = {
@@ -215,15 +216,11 @@ def update_output(list_of_contents, list_of_names):
             save_file(n, c)
 
         # ==============Classification process ====================
-        ## HAY QUE MODIFICAR LA FUNCION PREDICTION CON UN MODELO AJUSTADO Y NO RANDOM
+        
         infop.prediction(UPLOAD_DIRECTORY)
         print(infop.features.shape)
 
         infop.figure = make_plotClass()        
-
-        # Make the prediction dictionary with files and predictions
-        #PREDICTIONS_DICT = dict(zip(files, predictions))
-        # print(PREDICTIONS_DICT.values())
 
         # ========================================================
 
@@ -369,7 +366,7 @@ def make_plotClass():
 
     features = np.concatenate( (infop.features_train, infop.features))
 
-    im_embedded = TSNE(n_components=2, init='pca', random_state=42, n_jobs=-1, perplexity=20, n_iter=1000).fit_transform(features)
+    im_embedded = TSNE(n_components=2, init='pca', random_state=SEED).fit_transform(features)
 
 
     # scale and move the coordinates so they fit [0; 1] range
@@ -390,7 +387,7 @@ def make_plotClass():
     ty = scale_to_01_range(ty)
 
     # Clustering of the two tsne components
-    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10,random_state=42)
+    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10,random_state=SEED)
     im_normalized = np.c_[tx,ty]
     kmeans.fit(im_normalized.astype('float64'))
 

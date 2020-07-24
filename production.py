@@ -48,7 +48,7 @@ class predictor():
         self.tipos_train = tipos_train
         self.figure = None
 
-    def prediction(self, directorio, num_batch = 12):
+    def prediction(self, directorio, num_batch = 8):
         
         data = ImageList.from_folder(directorio) # build the ImageList from the folder
         learn.data.add_test(data) # add data to the test set of learn
