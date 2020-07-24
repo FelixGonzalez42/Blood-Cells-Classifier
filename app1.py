@@ -387,7 +387,7 @@ def make_plotClass():
     ty = scale_to_01_range(ty)
 
     # Clustering of the two tsne components
-    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10,random_state=SEED)
+    kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10, random_state=SEED)
     im_normalized = np.c_[tx,ty]
     kmeans.fit(im_normalized.astype('float64'))
 
