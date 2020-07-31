@@ -11,6 +11,7 @@ import os
 from flask import Flask
 
 import dash
+import dash_bootstrap_components as dbc
 import dash_auth # Use only as a secure option
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
@@ -89,6 +90,7 @@ external_stylesheets = [
 # we can create a route for downloading files directly:
 server = Flask(__name__)
 app = dash.Dash(__name__, server=server, external_stylesheets=external_stylesheets)
+# app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Use only as a secure option
 auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD)
@@ -109,7 +111,7 @@ app.layout = html.Div([
             'Blood Cell Classification',
             id='title',style={'color':'White'}
         ),
-        html.Img(
+        html.Img( 
             src=app.get_asset_url("logods4all.svg"),
             # style={'backgroundColor':'Purple'}
         )
@@ -226,11 +228,12 @@ def update_output(list_of_contents, list_of_names):
 
         # Automatic Tabs infered from the LABELS
         children = html.Div([
-                    dcc.Tabs( id="tabs", value='tab-0', 
+                    dcc.Tabs( id="tabs", value='tab-1', 
                     children=[
                         dcc.Tab(label='Chart', value='tab-0'),
                         dcc.Tab(label='Classification', value='tab-1'),
-                        dcc.Tab(label='Visual analysis', value='tab-2')
+                        dcc.Tab(label='Visual analysis', value='tab-2'),
+                        dcc.Tab(label='Help', value='tab-3')
                         ]
                         )
                     ])
@@ -249,7 +252,18 @@ def render_content(tab):
     if tab == 'tab-0':
         
         # Count the frecuencies of each predicted label
-        labels, values = count_images(infop.predictions_dict)          
+        labels, values = count_images(infop.predictions_dict)    
+
+        # Color map from seaborn
+        paleta = sns.color_palette("Set1", n_colors=8) # paleta para la dispersion
+        print(type(paleta))      
+        print(paleta.as_hex())      
+        print(labels)
+
+
+        colors = ['red', 'orange', 'darkgreen', 'blue', 'purple', 
+                    'orange', 'lightgreen', 'lightblue']
+
 
         out = html.Div([
             html.Div([
@@ -258,10 +272,13 @@ def render_content(tab):
                     figure={
                         'data':[
                             go.Bar(x=labels, y=values,
-                                   textfont=dict(size=20))    
+                                   textfont=dict(size=20),
+                                   marker_color = colors)                                                           
+                                                                                                                                             
+                                            
                     ],
                 'layout':go.Layout(
-                   title="Bar plot of predictions"
+                   title="Bar Plot of Predictions"
                     )
                 }          
             )],
@@ -272,10 +289,11 @@ def render_content(tab):
                     figure={
                         'data':[
                             go.Pie(labels=labels, values=values,
-                                   textfont=dict(size=20))
+                                   textfont=dict(size=20),
+                                   marker = dict(colors = colors))
                     ],
                 'layout':go.Layout(
-                   title="Pie chart of predictions"
+                   title="Pie Chart of Predictions"
                     )
                 }          
             )],
@@ -299,13 +317,53 @@ def render_content(tab):
         return child
 
     elif tab == 'tab-2':
-        child = html.Div([
+        child = html.Div([                   
+                                                        
             html.H4("TSNE of the Deep Features",
                     style={'textAlign': 'center'}),
-            dcc.Graph(
-            figure = infop.figure
-            )])
+            html.Div([                
+            html.Div([        
+            dcc.Graph(id='names_images',
+            figure = infop.figure),
+            ],
+                className="six columns",
+                 ),          
+         
 
+            html.Div([
+                    html.Img(id='click-image', src='children', height=200, width=200, hidden=True)
+                ], 
+                    style={'paddingtop':20, 'padding-left': '300px'}, className="six columns",
+                ),
+            
+            ], className="row")         
+                
+        ])
+
+        return child       
+
+    elif tab == 'tab-3':
+        child = html.Div([                                                         
+                    
+            
+            html.Div([
+                    dcc.Markdown('''
+                        
+                            ### Application Summary
+
+                            Blood cell classification is one of the most challenging tasks in blood diagnosis. Performing the classification of the cells through the manual procedure is difficult, prone to errors, and time-consuming due to the involvement of human labor. Also, for the manual segmentation, the experts make use of the advanced equipment, which cannot be adopted in rural areas. 
+
+                            The cell classification accuracy may also depend on the capabilities and experiences of the technical experts. Therefore, the necessity of an automated recognition system becomes inevitable. Deep learning methodology can help us to make this whole process more efficient and faster which potentially could save resources and lives. In addition, the experience gained in this work will be the basis for further extensions of convolutional neural networks (CNN) models to classify the broader classes of abnormal cells related to acute leukemia and lymphoma, such as myeloblasts, lymphoblasts, abnormal B or T lymphoid cells, and dysplastic cells that could help to diagnose. 
+
+                            Training a deep convolutional neural network (CNN) from scratch is challenging because it requires a large amount of labeled training data and a great deal of expertise to ensure proper convergence. A promising alternative is to fine-tune a CNN that has been pre-trained using, for instance, a large set of labeled natural images. This is the approach we used in this study, based on three different architectures: Resnet34, Resnet18 and EfficientNetB5. 
+
+                            We compare the three architectures and chose the one who offered the best accuracy on the validation set. Then, a fine-tuning process through Data Augmentation, finding the optimal Learning Rate and analyzing the deep features with methodologies like GradCam and t-SNE, PCA and K-means was made. As a result, we obtained a model with an accuracy on the test set of 99.94%.
+
+                            ''')          
+                
+            ])
+
+        ])            
         return child
 
 
@@ -385,6 +443,10 @@ def make_plotClass():
 
     tx = scale_to_01_range(tx)
     ty = scale_to_01_range(ty)
+    
+    infop.tx = tx[1000:]
+    infop.ty = ty[1000:]
+    
 
     # Clustering of the two tsne components
     kmeans = KMeans(init='k-means++', n_clusters=8, n_init=10,random_state=SEED)
@@ -445,6 +507,7 @@ def make_plotClass():
         
     for color,label in zip(paleta.as_hex(),kmeans_labels):
         ind = np.array(list(infop.predictions_dict.values())) == label
+        
         fig.add_trace(go.Scatter(
             x = tx[1000:][ind],
             y = ty[1000:][ind],
@@ -460,8 +523,13 @@ def make_plotClass():
             opacity = 1,
             hoverinfo = 'name',
             visible = True,
-            showlegend=False,
+            showlegend=False,           
         ))
+        
+        
+        
+        
+
 
     fig.update_layout(autosize=True,
                     # width=600, height=600,
@@ -479,8 +547,36 @@ def make_plotClass():
 
 
 
- 
+@app.callback([Output('click-image', 'src'),Output('click-image', 'hidden')],
+             [Input('names_images', 'clickData')])
+def callback_image(clickData):
+    
+    print(clickData)
+    print(type(clickData))
 
+    # if clickData is None:
+    #     return '100', True   
+       
+    
+    if clickData is not None:
+        files = np.array(list(infop.predictions_dict.keys()))
+        y=clickData['points'][0]['y']
+        x=clickData['points'][0]['x']
+        idx = (infop.tx == x) & (infop.ty == y)
+        archivo = files[idx]
+
+        if archivo.size > 0:
+            print(archivo)
+            print(UPLOAD_DIRECTORY)
+            return encode_image(os.path.join(UPLOAD_DIRECTORY,archivo[0])), False
+        else:
+            return None, True  
+    else:
+        return None, True 
+    
+
+
+    
 
 
 if __name__ == '__main__':
