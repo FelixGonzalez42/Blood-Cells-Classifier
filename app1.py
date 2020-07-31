@@ -12,7 +12,6 @@ from flask import Flask
 from flask_sslify import SSLify # redirects http to https
 
 import dash
-import dash_bootstrap_components as dbc
 import dash_auth # Use only as a secure option
 from dash.dependencies import Input, Output, State
 # import dash_core_components as dcc
