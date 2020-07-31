@@ -9,6 +9,7 @@ import base64
 import os
 # import sh
 from flask import Flask
+from flask_sslify import SSLify # redirects http to https
 
 import dash
 import dash_bootstrap_components as dbc
@@ -89,6 +90,7 @@ external_stylesheets = [
 # Normally, Dash creates its own Flask server internally. By creating our own,
 # we can create a route for downloading files directly:
 server = Flask(__name__)
+sslify = SSLify(server)  # redirects http to https
 app = dash.Dash(__name__, server=server, external_stylesheets=external_stylesheets)
 # app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -113,7 +115,7 @@ app.layout = html.Div([
         ),
         html.Img( 
             src=app.get_asset_url("logods4all.svg"),
-            # style={'backgroundColor':'Purple'}
+           # style={'backgroundColor':'Purple'}
         )
     ],
         className="banner",
