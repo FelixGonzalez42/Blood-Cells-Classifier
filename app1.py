@@ -33,7 +33,7 @@ from collections import Counter
 infop = predictor()
 
 ## =============================================
-USERNAME_PASSWORD = [['team14', 't34m14']] # Use only as a secure option
+USERNAME_PASSWORD = [['Team14', 'T34m14']] # Use only as a secure option
 
 # Detecting and/or making the current image path
 CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
