@@ -581,4 +581,8 @@ def callback_image(clickData):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    #app.run_server(debug=True)    
+    port = os.environ.get('dash_port')
+    debug = os.environ.get('dash_debug')=="True"
+    app.run_server(debug=debug, host="0.0.0.0", port=8050)
+  
