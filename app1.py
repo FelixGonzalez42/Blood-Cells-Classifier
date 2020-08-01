@@ -68,7 +68,15 @@ BOX_STYLE = {
         'width': '90%'
         }
 
+INITIAL_MESSAGE = '''
+                        
+                            ### Welcome
 
+                            Blood cell classification is one of the most challenging tasks in blood diagnosis. Performing the classification of the cells through the manual procedure is difficult, prone to errors, and time-consuming due to the involvement of human labor. Also, for the manual segmentation, the experts make use of the advanced equipment, which cannot be adopted in rural areas. 
+                            Use this examples images to classification. [Blood Cells Images](https://github.com/Fag42/MinTIC-DS4A-Project---Team-14/blob/master/Examples/Examples.zip)
+
+                           
+                            '''
 #Creating image folders
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
@@ -147,9 +155,11 @@ app.layout = html.Div([
             # Allow multiple files to be uploaded
             multiple=True,
             accept='image/*'
-        ),
+        ),        
         dcc.Loading( id="loading-1",
             children=[
+        html.Div(id='output_mrkdwn',          
+                    children=dcc.Markdown(INITIAL_MESSAGE)),
         html.Div(id='output-image-upload'),
         html.Div(id='tabs-content', style = {'margin':'auto'}) ] ),
 
@@ -203,7 +213,7 @@ def parse_contents(contents, filename, prediction):
 
 '''______________________Image Uploader______________________'''
 
-@app.callback(Output('output-image-upload', 'children'),
+@app.callback([Output('output-image-upload', 'children'), Output('output_mrkdwn', 'children')],
               [Input('upload-image', 'contents')],
               [State('upload-image', 'filename')])
 
@@ -229,17 +239,20 @@ def update_output(list_of_contents, list_of_names):
 
         # Automatic Tabs infered from the LABELS
         children = html.Div([
-                    dcc.Tabs( id="tabs", value='tab-1', 
+                    dcc.Tabs( id="tabs", value='tab-0', 
                     children=[
-                        dcc.Tab(label='Chart', value='tab-0'),
+                        dcc.Tab(label='Help', value='tab-0'),                        
                         dcc.Tab(label='Classification', value='tab-1'),
-                        dcc.Tab(label='Visual analysis', value='tab-2'),
-                        dcc.Tab(label='Help', value='tab-3')
+                        dcc.Tab(label='Chart', value='tab-2'),
+                        dcc.Tab(label='Visual analysis', value='tab-3'),
+                        
                         ]
                         )
                     ])
 
-        return children
+        return children, True
+    else:
+        return None, dcc.Markdown(INITIAL_MESSAGE)
 
 
 '''______________________Tabs______________________'''
@@ -250,16 +263,10 @@ def update_output(list_of_contents, list_of_names):
 def render_content(tab):
 
     
-    if tab == 'tab-0':
+    if tab == 'tab-2':
         
         # Count the frecuencies of each predicted label
-        labels, values = count_images(infop.predictions_dict)    
-
-        # Color map from seaborn
-        paleta = sns.color_palette("Set1", n_colors=8) # paleta para la dispersion
-        print(type(paleta))      
-        print(paleta.as_hex())      
-        print(labels)
+        labels, values = count_images(infop.predictions_dict)           
 
 
         colors = ['red', 'orange', 'darkgreen', 'blue', 'purple', 
@@ -307,8 +314,7 @@ def render_content(tab):
 
     elif tab == 'tab-1':
         child = list()
-        for l in infop.labels:
-            
+        for l in infop.labels:            
             child.append( html.Div( children = show_test(l) +
             [html.Span(l, className = 'index', style = SPAN_STYLE)],
              className = 'box', style = BOX_STYLE
@@ -317,7 +323,7 @@ def render_content(tab):
 
         return child
 
-    elif tab == 'tab-2':
+    elif tab == 'tab-3':
         child = html.Div([                   
                                                         
             html.H4("TSNE of the Deep Features",
@@ -332,9 +338,11 @@ def render_content(tab):
          
 
             html.Div([
-                    html.Img(id='click-image', src='children', height=200, width=200, hidden=True)
+                    html.Img(id='click-image', src='children', height=200, 
+                    width=200, hidden=True)
                 ], 
-                    style={'paddingtop':20, 'padding-left': '300px'}, className="six columns",
+                    style={'paddingtop':20, 'padding-left': '300px'}, 
+                    className="six columns",
                 ),
             
             ], className="row")         
@@ -343,7 +351,7 @@ def render_content(tab):
 
         return child       
 
-    elif tab == 'tab-3':
+    elif tab == 'tab-0':
         child = html.Div([                                                         
                     
             
@@ -550,14 +558,7 @@ def make_plotClass():
 
 @app.callback([Output('click-image', 'src'),Output('click-image', 'hidden')],
              [Input('names_images', 'clickData')])
-def callback_image(clickData):
-    
-    print(clickData)
-    print(type(clickData))
-
-    # if clickData is None:
-    #     return '100', True   
-       
+def callback_image(clickData):     
     
     if clickData is not None:
         files = np.array(list(infop.predictions_dict.keys()))
