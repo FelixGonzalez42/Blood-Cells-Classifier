@@ -33,7 +33,7 @@ from collections import Counter
 infop = predictor()
 
 ## =============================================
-USERNAME_PASSWORD = [['team14', 't34m14']] # Use only as a secure option
+USERNAME_PASSWORD = [['Team14', 'T34m14']] # Use only as a secure option
 
 # Detecting and/or making the current image path
 CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
@@ -582,4 +582,8 @@ def callback_image(clickData):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)    
+    #port = os.environ.get('dash_port')
+    #debug = os.environ.get('dash_debug')=="True"
+    #app.run_server(debug=debug, host="0.0.0.0", port=8050)
+  
