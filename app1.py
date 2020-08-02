@@ -33,7 +33,7 @@ from collections import Counter
 infop = predictor()
 
 ## =============================================
-USERNAME_PASSWORD = [['Team14', 'T34m14']] # Use only as a secure option
+USERNAME_PASSWORD = [['team14', 't34m14']] # Use only as a secure option
 
 # Detecting and/or making the current image path
 CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
@@ -72,11 +72,28 @@ INITIAL_MESSAGE = '''
                         
                             ### Welcome
 
-                            Blood cell classification is one of the most challenging tasks in blood diagnosis. Performing the classification of the cells through the manual procedure is difficult, prone to errors, and time-consuming due to the involvement of human labor. Also, for the manual segmentation, the experts make use of the advanced equipment, which cannot be adopted in rural areas. 
+                            Blood cell classification is one of the most challenging tasks in blood diagnosis. 
+                            Performing the classification of the cells through the manual procedure is difficult, prone to errors, and time-consuming due to the involvement of human labor. 
+                            Also, for the manual segmentation, the experts make use of the advanced equipment, which cannot be adopted in rural areas.
+
+                            The application allows loading the images to be classified. Once the images are loaded, the user will have three (3) tabs available to interact with the loaded images 
+                            
+                            1. Classification-allows the user to view how the images were classified according to the types of cells available 
+                            2. Chart-allows the user to quickly identify the amounts of images classified in each cell type with a bar chart and a pie chart.
+                            3. Visual Analysis-the most interactive tab since it shows the user through a scatter diagram the type of cells images loaded divided by zones. When clicking at each point, which represents a peripheral blood cell, shows the loaded image file already classified.
+
                             Use this examples images to classification. [Blood Cells Images](https://github.com/Fag42/MinTIC-DS4A-Project---Team-14/blob/master/Examples/Examples.zip)
 
                            
                             '''
+
+VISUAL_DESCRIPTION = """This is the most interactive tab, since it shows a scatter plot generated through the dimensionality reduction of
+the deep features of the last layer of the CNN model using [t-SNE](https://lvdmaaten.github.io/tsne/). The background of the plot, which
+is similar to a boundary decision graph, is made by implementing the k-means clustering technique to the (t-SNE components of the) uploaded cell
+images along with 1000 training cells. Thus, every type of the loaded cell images is shown in a corresponding region. Clicking on 
+each point, which represents a peripheral blood cell, displays the loaded image file already classified."""
+
+
 #Creating image folders
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
@@ -231,7 +248,7 @@ def update_output(list_of_contents, list_of_names):
         # ==============Classification process ====================
         
         infop.prediction(UPLOAD_DIRECTORY)
-        print(infop.features.shape)
+        # print(infop.features.shape)
 
         infop.figure = make_plotClass()        
 
@@ -239,7 +256,7 @@ def update_output(list_of_contents, list_of_names):
 
         # Automatic Tabs infered from the LABELS
         children = html.Div([
-                    dcc.Tabs( id="tabs", value='tab-0', 
+                    dcc.Tabs( id="tabs", value='tab-1', 
                     children=[
                         dcc.Tab(label='Help', value='tab-0'),                        
                         dcc.Tab(label='Classification', value='tab-1'),
@@ -328,6 +345,8 @@ def render_content(tab):
                                                         
             html.H4("TSNE of the Deep Features",
                     style={'textAlign': 'center'}),
+                    
+                      
             html.Div([                
             html.Div([        
             dcc.Graph(id='names_images',
@@ -338,15 +357,21 @@ def render_content(tab):
          
 
             html.Div([
-                    html.Img(id='click-image', src='children', height=200, 
-                    width=200, hidden=True)
+                    html.Img(id='click-image', src='children', height=300, 
+                    width=300, hidden=True)
                 ], 
-                    style={'paddingtop':20, 'padding-left': '300px'}, 
+                    style={'height': '450px', 'paddingtop':20, 'padding-left': '200px', 'display':'flex',
+                    'justify-content': 'center', 'align-items': 'center' }, 
                     className="six columns",
                 ),
             
-            ], className="row")         
-                
+            
+            ], className="row"       
+            
+            ),                
+
+            dcc.Markdown(VISUAL_DESCRIPTION,
+                    style={'textAlign':'bottom'}),  
         ])
 
         return child       
@@ -356,19 +381,7 @@ def render_content(tab):
                     
             
             html.Div([
-                    dcc.Markdown('''
-                        
-                            ### Application Summary
-
-                            Blood cell classification is one of the most challenging tasks in blood diagnosis. Performing the classification of the cells through the manual procedure is difficult, prone to errors, and time-consuming due to the involvement of human labor. Also, for the manual segmentation, the experts make use of the advanced equipment, which cannot be adopted in rural areas. 
-
-                            The cell classification accuracy may also depend on the capabilities and experiences of the technical experts. Therefore, the necessity of an automated recognition system becomes inevitable. Deep learning methodology can help us to make this whole process more efficient and faster which potentially could save resources and lives. In addition, the experience gained in this work will be the basis for further extensions of convolutional neural networks (CNN) models to classify the broader classes of abnormal cells related to acute leukemia and lymphoma, such as myeloblasts, lymphoblasts, abnormal B or T lymphoid cells, and dysplastic cells that could help to diagnose. 
-
-                            Training a deep convolutional neural network (CNN) from scratch is challenging because it requires a large amount of labeled training data and a great deal of expertise to ensure proper convergence. A promising alternative is to fine-tune a CNN that has been pre-trained using, for instance, a large set of labeled natural images. This is the approach we used in this study, based on three different architectures: Resnet34, Resnet18 and EfficientNetB5. 
-
-                            We compare the three architectures and chose the one who offered the best accuracy on the validation set. Then, a fine-tuning process through Data Augmentation, finding the optimal Learning Rate and analyzing the deep features with methodologies like GradCam and t-SNE, PCA and K-means was made. As a result, we obtained a model with an accuracy on the test set of 99.94%.
-
-                            ''')          
+                    dcc.Markdown(INITIAL_MESSAGE)          
                 
             ])
 
@@ -436,6 +449,7 @@ def make_plotClass():
     im_embedded = TSNE(n_components=2, init='pca', random_state=SEED).fit_transform(features)
 
 
+
     # scale and move the coordinates so they fit [0; 1] range
     def scale_to_01_range(x):
         # compute the distribution range
@@ -468,7 +482,7 @@ def make_plotClass():
     for tipo in set(tipos_train):
         idx = tipos_train==tipo
         tt = np.c_[tx[:1000][idx], ty[:1000][idx]]
-        clu = kmeans.predict(tt.mean(axis=0).reshape(1,-1).astype('float64'))
+        clu = kmeans.predict(np.mean(tt,axis=0).reshape(1,-1).astype('float64'))
         kmeans_labels[clu[0]]=tipo
 
     # Step size of the mesh. Decrease to increase the quality of the VQ.
@@ -495,7 +509,6 @@ def make_plotClass():
         showscale=False,
         hoverinfo='none',
     ))
-
     for color,label in zip(paleta.as_hex(),kmeans_labels):
         ind = tipos_train == label
         fig.add_trace(go.Scatter(
@@ -506,20 +519,34 @@ def make_plotClass():
                 size = 15,
                 symbol = 'circle',
                 color = color,
-                opacity = 0.01,
+                opacity = 1,
             ),
             name = label,
-            opacity = 1,
+            opacity = 0.4,
             hoverinfo = 'none',
             visible = 'legendonly',
         ))
-        
+
+    print(infop.predictions_dict)    
+    print(list(infop.predictions_dict.values()))
     for color,label in zip(paleta.as_hex(),kmeans_labels):
         ind = np.array(list(infop.predictions_dict.values())) == label
-        
+
+        a = -0.04
+        b = -a
+        smallx = (b-a)*np.random.random_sample(tx[1000:][ind].shape) + a
+        smally = (b-a)*np.random.random_sample(tx[1000:][ind].shape) + a
+        TX = tx[1000:][ind]+smallx
+        TY = ty[1000:][ind]+smally
+        tx[1000:][ind] = TX
+        ty[1000:][ind] = TY
+
+        # TX = tx[1000:][ind]
+        # TY = ty[1000:][ind]
+
         fig.add_trace(go.Scatter(
-            x = tx[1000:][ind],
-            y = ty[1000:][ind],
+            x = TX,
+            y = TY,
             mode = 'markers',
             marker=dict(
                 size = 10,
@@ -568,8 +595,8 @@ def callback_image(clickData):
         archivo = files[idx]
 
         if archivo.size > 0:
-            print(archivo)
-            print(UPLOAD_DIRECTORY)
+            # print(archivo)
+            # print(UPLOAD_DIRECTORY)
             return encode_image(os.path.join(UPLOAD_DIRECTORY,archivo[0])), False
         else:
             return None, True  
@@ -582,8 +609,4 @@ def callback_image(clickData):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)    
-    #port = os.environ.get('dash_port')
-    #debug = os.environ.get('dash_debug')=="True"
-    #app.run_server(debug=debug, host="0.0.0.0", port=8050)
-  
+    app.run_server(debug=True)
