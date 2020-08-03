@@ -19,7 +19,7 @@
 
 5 - Build the docker image:
 ```bash
-  sudo docker build -t ds4a2 . --no-cache"
+  sudo docker build -t ds4a2 . --no-cache
 ```
 
 ## To run:
