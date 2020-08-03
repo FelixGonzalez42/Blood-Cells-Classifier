@@ -522,7 +522,7 @@ def make_plotClass():
                 opacity = 1,
             ),
             name = label,
-            opacity = 0.4,
+            opacity = 1,
             hoverinfo = 'none',
             visible = 'legendonly',
         ))
