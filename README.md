@@ -1,24 +1,39 @@
-# MinTIC-DS4A-Project---Team-14
+<p align="center"><img src="https://github.com/Fag42/Blood-Cells-Classifier/blob/master/Documents/Media/GradCam.png"></p>
+<H1 align="center">A Peripheral Blood Cell Classification App</H1>
 
-**Código del proyecto DS4A Clasificador de células de sangre periférica team 14**
+## To build:
 
-***¿Como correr?**
+1 - Install Docker and git
 
-* Instala Git https://git-scm.com/book/es/v2/Inicio---Sobre-el-Control-de-Versiones-Instalación-de-Git
-* Clona este repositorio *git clone https://github.com/Fag42/MinTIC-DS4A-Project---Team-14*
-* Entra en la carpeta del código *cd /MinTIC-DS4A-Project---Team-14*
+2 - Open a command console (cmd,bash)
 
-**Si tienes instalado Docker:
+3 - Clone the official-repo:
+```bash
+  git clone https://github.com/Fag42/Blood-Cells-Classifier
+```
 
-* Crea la imagen de docker (si es necesario como administrador o sudo) *docker build -t ds4a . --no-cache*
-* Ejecuta la aplicación (si es necesario como administrador o sudo) *sudo docker run -p 8080:8050 --name ds4a -v $(pwd):/var/www/app/public ds4a*
-* La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8080
+4 - Go to app folder:
+```bash
+  cd /Blood-Cells-Classifier/App
+```
 
-**Si no tienes Docker:
+5 - Build the docker image:
+```bash
+  sudo docker build -t ds4a2 . --no-cache"
+```
 
-* Asegurate de tener Python3.8 y pip3 instalado 
-* Instala las librerias necesarias listadas en requirements.txt *pip3 install -r requirements.txt*
-* Ejecuta la aplicación *python3 app1.py*
-* La plicación debería ejecutarse en tu computador (localhost) y deberías poder verla en http://0.0.0.0:8050
+## To run:
 
-**instrucciones para Construir la imagen del servidor, instalar librerias en el servidor y ejecutar pruebas en el servidor de azure (Próximamente..)
+1 - Go to app folder: 
+```bash
+  cd /Blood-Cells-Classifier/App
+```
+
+2 - Execute the Docker container 
+```bash
+  sudo docker run -d -p 80:8050 --name ds4a -v $(pwd):/var/www/app/ ds4a2 -c "gunicorn app1:server -b :8050 -t 1000"
+```
+
+3 - Go to webpage: localhost:80
+
+4 - <b>Enjoy</b>
