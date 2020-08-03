@@ -9,7 +9,7 @@ import base64
 import os
 # import sh
 from flask import Flask
-from flask_sslify import SSLify # redirects http to https
+#from flask_sslify import SSLify # redirects http to https
 
 import dash
 import dash_auth # Use only as a secure option
@@ -114,7 +114,7 @@ external_stylesheets = [
 # Normally, Dash creates its own Flask server internally. By creating our own,
 # we can create a route for downloading files directly:
 server = Flask(__name__)
-sslify = SSLify(server)  # redirects http to https
+#sslify = SSLify(server)  # redirects http to https
 app = dash.Dash(__name__, server=server, external_stylesheets=external_stylesheets)
 # app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
