@@ -22,7 +22,7 @@
   sudo docker build -t ds4a2 . --no-cache
 ```
 
-## To run:
+## To try:
 
 1 - Open a command console (cmd,bash)
 
