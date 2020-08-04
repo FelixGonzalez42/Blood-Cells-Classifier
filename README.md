@@ -39,3 +39,8 @@
 4 - Go to webpage: localhost:80
 
 5 - <b>Enjoy</b>
+
+## To run:
+
+We have a demo application accessible from <b>https://bloodcells.ddns.net</b> (User: team14, Password: t34m14)
+- Subject to server availability restrictions, <b>¡Feel free to try it!</b>
